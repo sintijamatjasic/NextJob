@@ -1,6 +1,7 @@
 <script setup>
 import Filters from '@/components/Filters.vue'
 import JobList from '@/components/JobList.vue'
+import JobModal from '@/components/JobModal.vue'
 import SearchBar from '@/components/SearchBar.vue'
 import { computed, onMounted, ref } from 'vue'
 
@@ -15,6 +16,7 @@ const levelValue = ref('All')
 const salaryValue = ref('All')
 const sortValue = ref('Default')
 const remoteOnly = ref(false)
+const selectedJob = ref(null)
 
 const categories = computed(() => {
   return ['All', ...new Set(jobs.value.map((job) => job.category))]
@@ -101,6 +103,14 @@ function clearFilters() {
   sortValue.value = 'Default'
   remoteOnly.value = false
 }
+
+function openJobModal(job) {
+  selectedJob.value = job
+}
+
+function closeJobModal() {
+  selectedJob.value = null
+}
 </script>
 
 <template>
@@ -147,7 +157,9 @@ function clearFilters() {
         v-model:remote-only="remoteOnly"
       />
     </div>
-    <JobList :jobs="filteredJobs" />
+    <JobList :jobs="filteredJobs" @view-job="openJobModal" />
+
+    <JobModal v-if="selectedJob" :job="selectedJob" @close="closeJobModal" />
   </div>
 </template>
 

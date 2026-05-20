@@ -44,7 +44,7 @@ defineProps({
     <div class="job-bottom">
       <p class="salary">{{ job.salary }}€</p>
 
-      <button class="details-btn">Details</button>
+      <button class="details-btn" @click="$emit('view-job', job)">Details</button>
     </div>
   </div>
 </template>
