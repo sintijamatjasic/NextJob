@@ -1,4 +1,5 @@
 <script setup>
+import Filters from '@/components/Filters.vue'
 import JobList from '@/components/JobList.vue'
 import SearchBar from '@/components/SearchBar.vue'
 import { computed, onMounted, ref } from 'vue'
@@ -7,6 +8,28 @@ const jobs = ref([])
 const isLoading = ref(true)
 const errorMessage = ref('')
 const searchValue = ref('')
+const showFilters = ref(false)
+const categoryValue = ref('All')
+const locationValue = ref('All')
+const levelValue = ref('All')
+const salaryValue = ref('All')
+const sortValue = ref('Default')
+const remoteOnly = ref(false)
+
+const categories = computed(() => {
+  return ['All', ...new Set(jobs.value.map((job) => job.category))]
+})
+
+const locations = computed(() => {
+  return ['All', ...new Set(jobs.value.map((job) => job.location))]
+})
+
+const levels = computed(() => {
+  return ['All', ...new Set(jobs.value.map((job) => job.level))]
+})
+
+const salaryRanges = ['All', 'Under 2000', '2000-3000', '3000-4000', '4000+']
+const sortOptions = ['Default', 'Newest', 'Highest salary', 'A-Z']
 
 onMounted(async () => {
   try {
@@ -26,13 +49,58 @@ onMounted(async () => {
 })
 
 const filteredJobs = computed(() => {
-  return jobs.value.filter((job) => {
+  const filtered = jobs.value.filter((job) => {
     const matchesSearch =
       job.title.toLowerCase().includes(searchValue.value.toLowerCase()) ||
       job.company.toLowerCase().includes(searchValue.value.toLowerCase())
-    return matchesSearch
+
+    const matchesCategory = categoryValue.value === 'All' || categoryValue.value === job.category
+    const matchesLocation = locationValue.value === 'All' || locationValue.value === job.location
+    const matchesLevel = levelValue.value === 'All' || levelValue.value === job.level
+    const matchesSalaryRange =
+      salaryValue.value === 'All' ||
+      (salaryValue.value === 'Under 2000' && job.salary < 2000) ||
+      (salaryValue.value === '2000-3000' && job.salary >= 2000 && job.salary < 3000) ||
+      (salaryValue.value === '3000-4000' && job.salary >= 3000 && job.salary < 4000) ||
+      (salaryValue.value === '4000+' && job.salary >= 4000)
+    const matchesRemote = !remoteOnly.value || job.remote
+
+    return (
+      matchesSearch &&
+      matchesCategory &&
+      matchesLocation &&
+      matchesLevel &&
+      matchesSalaryRange &&
+      matchesRemote
+    )
   })
+
+  const sorted = [...filtered]
+
+  if (sortValue.value === 'Newest') {
+    sorted.sort((a, b) => a.postedDaysAgo - b.postedDaysAgo)
+  } else if (sortValue.value === 'Highest salary') {
+    sorted.sort((a, b) => b.salary - a.salary)
+  } else if (sortValue.value === 'A-Z') {
+    sorted.sort((a, b) => a.title.localeCompare(b.title))
+  }
+  return sorted
 })
+
+function toggleFilterVisibility() {
+  showFilters.value = !showFilters.value
+}
+
+function clearFilters() {
+  searchValue.value = ''
+  showFilters.value = false
+  categoryValue.value = 'All'
+  locationValue.value = 'All'
+  levelValue.value = 'All'
+  salaryValue.value = 'All'
+  sortValue.value = 'Default'
+  remoteOnly.value = false
+}
 </script>
 
 <template>
@@ -56,12 +124,28 @@ const filteredJobs = computed(() => {
       <div class="top-row">
         <SearchBar v-model="searchValue" />
 
-        <button class="clear-btn">Clear filters</button>
+        <button class="clear-btn" @click="clearFilters">Clear filters</button>
 
         <button class="saved-btn"><i class="fa-regular fa-bookmark"></i> Saved Jobs</button>
 
-        <button class="toggle-filters-btn">Show filters</button>
+        <button class="toggle-filters-btn" @click="toggleFilterVisibility">
+          {{ showFilters ? 'Hide Filters' : 'Show Filters' }}
+        </button>
       </div>
+      <Filters
+        v-if="showFilters"
+        :categories="categories"
+        :locations="locations"
+        :levels="levels"
+        :salaryRanges="salaryRanges"
+        :sortOptions="sortOptions"
+        v-model:selected-category="categoryValue"
+        v-model:selected-location="locationValue"
+        v-model:selected-level="levelValue"
+        v-model:selected-salary-range="salaryValue"
+        v-model:selected-sort="sortValue"
+        v-model:remote-only="remoteOnly"
+      />
     </div>
     <JobList :jobs="filteredJobs" />
   </div>
