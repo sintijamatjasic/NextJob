@@ -8,7 +8,13 @@ defineProps({
 
 <template>
   <div v-if="jobs.length" class="job-list">
-    <JobCard v-for="job in jobs" :key="job.id" :job="job" @view-job="$emit('view-job', $event)" />
+    <JobCard
+      v-for="job in jobs"
+      :key="job.id"
+      :job="job"
+      @view-job="$emit('view-job', $event)"
+      @toggle-saved="$emit('toggle-saved', $event)"
+    />
   </div>
 
   <div v-else class="empty-state">

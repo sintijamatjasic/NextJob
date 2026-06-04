@@ -16,8 +16,12 @@ defineProps({
         </div>
       </div>
 
-      <button class="save-btn">
-        <i class="fa-regular fa-bookmark"></i>
+      <button
+        class="save-btn"
+        :class="{ active: job.favorite }"
+        @click="$emit('toggle-saved', job.id)"
+      >
+        <i :class="job.favorite ? 'fa-solid fa-bookmark' : 'fa-regular fa-bookmark'"></i>
       </button>
     </div>
 
@@ -115,14 +119,31 @@ defineProps({
   border: 1px solid #dbe3ee;
   border-radius: 10px;
   background: white;
-  color: #4e6866;
+  color: #7b8794;
   cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.save-btn:hover {
+  transform: transalteY(-1px);
+  border-color: #f4c542;
 }
 
 .save-btn.active {
-  background: #116a62;
-  color: white;
-  border-color: #116a62;
+  background: #fff8db;
+  color: #d4a017;
+  border-color: #f4c542;
+}
+
+.save-btn.active i {
+  color: #d4a017;
+}
+
+.save-btn:hover i {
+  color: #d4a017;
 }
 
 .job-badges,

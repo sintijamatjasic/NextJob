@@ -3,6 +3,7 @@ import Filters from '@/components/Filters.vue'
 import JobList from '@/components/JobList.vue'
 import JobModal from '@/components/JobModal.vue'
 import SearchBar from '@/components/SearchBar.vue'
+import ActiveFilters from '@/components/ActiveFilters.vue'
 import { computed, onMounted, ref } from 'vue'
 
 const jobs = ref([])
@@ -17,6 +18,7 @@ const salaryValue = ref('All')
 const sortValue = ref('Default')
 const remoteOnly = ref(false)
 const selectedJob = ref(null)
+const savedOnly = ref(false)
 
 const categories = computed(() => {
   return ['All', ...new Set(jobs.value.map((job) => job.category))]
@@ -43,6 +45,8 @@ onMounted(async () => {
 
     const data = await response.json()
     jobs.value = data
+
+    loadSavedJobsFromStorage()
   } catch (error) {
     errorMessage.value = 'Failed to load jobs.'
   } finally {
@@ -66,6 +70,7 @@ const filteredJobs = computed(() => {
       (salaryValue.value === '3000-4000' && job.salary >= 3000 && job.salary < 4000) ||
       (salaryValue.value === '4000+' && job.salary >= 4000)
     const matchesRemote = !remoteOnly.value || job.remote
+    const matchesSaved = !savedOnly.value || job.favorite
 
     return (
       matchesSearch &&
@@ -73,7 +78,8 @@ const filteredJobs = computed(() => {
       matchesLocation &&
       matchesLevel &&
       matchesSalaryRange &&
-      matchesRemote
+      matchesRemote &&
+      matchesSaved
     )
   })
 
@@ -102,6 +108,7 @@ function clearFilters() {
   salaryValue.value = 'All'
   sortValue.value = 'Default'
   remoteOnly.value = false
+  savedOnly.value = false
 }
 
 function openJobModal(job) {
@@ -110,6 +117,107 @@ function openJobModal(job) {
 
 function closeJobModal() {
   selectedJob.value = null
+}
+
+function toggleSaved(jobId) {
+  const job = jobs.value.find((item) => item.id === jobId)
+
+  if (job) {
+    job.favorite = !job.favorite
+    saveSavedJobsToStorage()
+  }
+}
+
+function saveSavedJobsToStorage() {
+  const savedJobIds = jobs.value.filter((job) => job.favorite).map((job) => job.id)
+  localStorage.setItem('savedJobs', JSON.stringify(savedJobIds))
+}
+
+function loadSavedJobsFromStorage() {
+  const storedSavedJobs = localStorage.getItem('savedJobs')
+
+  if (!storedSavedJobs) return
+
+  const savedJobIds = JSON.parse(storedSavedJobs)
+
+  jobs.value.forEach((job) => {
+    job.favorite = savedJobIds.includes(job.id)
+  })
+}
+
+const activeFilters = computed(() => {
+  const filters = []
+
+  if (categoryValue.value !== 'All') {
+    filters.push({
+      key: 'category',
+      label: categoryValue.value,
+    })
+  }
+
+  if (locationValue.value !== 'All') {
+    filters.push({
+      key: 'location',
+      label: locationValue.value,
+    })
+  }
+
+  if (levelValue.value !== 'All') {
+    filters.push({
+      key: 'level',
+      label: levelValue.value,
+    })
+  }
+
+  if (salaryValue.value !== 'All') {
+    filters.push({
+      key: 'salary',
+      label: salaryValue.value,
+    })
+  }
+
+  if (remoteOnly.value) {
+    filters.push({
+      key: 'remote',
+      label: 'Remote only',
+    })
+  }
+
+  if (sortValue.value !== 'Default') {
+    filters.push({
+      key: 'sort',
+      label: sortValue.value,
+    })
+  }
+
+  if (searchValue.value.trim() !== '') {
+    filters.push({
+      key: 'search',
+      label: `Search: ${searchValue.value}`,
+    })
+  }
+
+  return filters
+})
+
+function removeFilter(filterKey) {
+  if (filterKey === 'category') {
+    categoryValue.value = 'All'
+  } else if (filterKey === 'location') {
+    locationValue.value = 'All'
+  } else if (filterKey === 'level') {
+    levelValue.value = 'All'
+  } else if (filterKey === 'salary') {
+    salaryValue.value = 'All'
+  } else if (filterKey === 'remote') {
+    remoteOnly.value = false
+  } else if (filterKey === 'saved') {
+    savedOnly.value = false
+  } else if (filterKey === 'sort') {
+    sortValue.value = 'Default'
+  } else if (filterKey === 'search') {
+    searchValue.value = ''
+  }
 }
 </script>
 
@@ -134,9 +242,9 @@ function closeJobModal() {
       <div class="top-row">
         <SearchBar v-model="searchValue" />
 
-        <button class="clear-btn" @click="clearFilters">Clear filters</button>
-
-        <button class="saved-btn"><i class="fa-regular fa-bookmark"></i> Saved Jobs</button>
+        <button class="saved-btn" :class="{ active: savedOnly }" @click="savedOnly = !savedOnly">
+          <i :class="savedOnly ? 'fa-solid fa-bookmark' : 'fa-regular fa-bookmark'"></i> Saved Jobs
+        </button>
 
         <button class="toggle-filters-btn" @click="toggleFilterVisibility">
           {{ showFilters ? 'Hide Filters' : 'Show Filters' }}
@@ -156,10 +264,21 @@ function closeJobModal() {
         v-model:selected-sort="sortValue"
         v-model:remote-only="remoteOnly"
       />
+      <ActiveFilters
+        :filters="activeFilters"
+        @remove-filter="removeFilter"
+        @clear-all="clearFilters"
+      />
     </div>
-    <JobList :jobs="filteredJobs" @view-job="openJobModal" />
 
-    <JobModal v-if="selectedJob" :job="selectedJob" @close="closeJobModal" />
+    <JobList :jobs="filteredJobs" @view-job="openJobModal" @toggle-saved="toggleSaved" />
+    <transition name="modal-fade">
+      <JobModal
+        v-if="selectedJob"
+        :job="selectedJob"
+        @close="closeJobModal"
+        @toggle-saved="toggleSaved"
+    /></transition>
   </div>
 </template>
 
@@ -168,6 +287,7 @@ function closeJobModal() {
   max-width: 1280px;
   margin: 0 auto;
   padding: 2rem 1.25rem 3rem;
+  overflow-x: hidden;
 }
 
 .hero {
@@ -234,7 +354,6 @@ function closeJobModal() {
   align-items: center;
 }
 
-.clear-btn,
 .saved-btn,
 .toggle-filters-btn {
   border: 1px solid #dbe3ee;
@@ -247,7 +366,6 @@ function closeJobModal() {
   transition: 0.2s ease;
 }
 
-.clear-btn:hover,
 .saved-btn:hover,
 .toggle-filters-btn:hover {
   transform: translateY(-1px);
@@ -259,9 +377,20 @@ function closeJobModal() {
   border-color: #116a62;
 }
 
+.hero-content,
+.controls,
+.top-row {
+  min-width: 0;
+}
+
 @media (max-width: 960px) {
   .hero {
     grid-template-columns: 1fr;
+  }
+
+  .hero-image {
+    order: -1;
+    min-height: 220px;
   }
 }
 
@@ -270,9 +399,19 @@ function closeJobModal() {
     grid-template-columns: 1fr;
   }
 
-  .clear-btn,
-  .save-btn {
+  .saved-btn,
+  .toggle-filters-btn {
     width: 100%;
   }
+}
+
+.modal-fade-enter-active,
+.modal-fade-leave-active {
+  transition: all 0.25s ease;
+}
+.modal-fade-enter-from,
+.modal-fade-leave-to {
+  opacity: 0;
+  transform: scale(0.97);
 }
 </style>

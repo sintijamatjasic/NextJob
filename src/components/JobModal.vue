@@ -5,15 +5,24 @@ defineProps({
 </script>
 
 <template>
-  <div class="modal-back">
-    <div class="modal-card">
-      <button class="modal-close">
+  <div class="modal-back" @click="$emit('close')">
+    <div class="modal-card" @click.stop>
+      <button class="modal-close" @click="$emit('close')">
         <i class="fa-solid fa-xmark"></i>
       </button>
 
       <div class="modal-content">
         <div class="modal-header">
-          <h2 class="modal-title">{{ job.title }}</h2>
+          <div class="title">
+            <h2 class="modal-title">{{ job.title }}</h2>
+            <button
+              class="save-btn"
+              :class="{ active: job.favorite }"
+              @click="$emit('toggle-saved', job.id)"
+            >
+              <i :class="job.favorite ? 'fa-solid fa-bookmark' : 'fa-regular fa-bookmark'"></i>
+            </button>
+          </div>
 
           <p class="modal-company">{{ job.company }}</p>
 
@@ -62,6 +71,18 @@ defineProps({
 </template>
 
 <style scoped>
+.modal-back {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.45);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.25rem;
+  z-index: 1000;
+}
+
 .modal-card {
   position: relative;
   width: min(900px, 100%);
@@ -86,6 +107,12 @@ defineProps({
   z-index: 2;
 }
 
+.modal-close:hover {
+  color: rgb(255, 110, 110);
+  border: 1px solid rgb(255, 110, 110);
+  transition: 0.3s ease;
+}
+
 .modal-content {
   padding: 1.5rem;
   display: flex;
@@ -104,6 +131,46 @@ defineProps({
   margin: 0;
   font-size: 1.8rem;
   line-height: 1.05;
+}
+
+.title {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.save-btn {
+  width: 40px;
+  height: 40px;
+  border: 1px solid #dbe3ee;
+  border-radius: 10px;
+  background: white;
+  color: #7b8794;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.save-btn:hover {
+  transform: translateY(-1px);
+  border-color: #f4c542;
+}
+
+.save-btn.active {
+  background: #fff8db;
+  color: #d4a017;
+  border-color: #f4c542;
+}
+
+.save-btn.active i {
+  color: #d4a017;
+}
+
+.save-btn:hover i {
+  color: #d4a017;
 }
 
 .modal-company {
@@ -157,5 +224,31 @@ defineProps({
 
 .modal-list {
   padding-left: 1.2rem;
+}
+
+@media (max-width: 700px) {
+  .modal-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .modal-content {
+    padding: 1rem;
+  }
+
+  .modal-section {
+    padding: 0.9rem;
+  }
+
+  .modal-title,
+  .modal-heading h2 {
+    font-size: 1.6rem;
+    line-height: 1.05;
+  }
+
+  .modal-close,
+  .save-btn {
+    width: 38px;
+    height: 38px;
+  }
 }
 </style>
