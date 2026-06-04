@@ -1,38 +1,69 @@
-# .
+# NextJob
 
-This template should help get you started developing with Vue 3 in Vite.
+NextJob is a frontend job board built with Vue.
 
-## Recommended IDE Setup
+I made this project to practice working with fetched data, component communication, filtering, sorting, saved jobs, and responsive UI design in a way that feels close to a real product.
 
-[VS Code](https://code.visualstudio.com/) + [Vue (Official)](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur).
+## What it does
 
-## Recommended Browser Setup
+Users can:
 
-- Chromium-based browsers (Chrome, Edge, Brave, etc.):
-  - [Vue.js devtools](https://chromewebstore.google.com/detail/vuejs-devtools/nhdogjmejiglipccpnnnanhbledajbpd)
-  - [Turn on Custom Object Formatter in Chrome DevTools](http://bit.ly/object-formatters)
-- Firefox:
-  - [Vue.js devtools](https://addons.mozilla.org/en-US/firefox/addon/vue-js-devtools/)
-  - [Turn on Custom Object Formatter in Firefox DevTools](https://fxdx.dev/firefox-devtools-custom-object-formatters/)
+- search jobs by title or company
+- filter by category, location, level, salary, and remote-only roles
+- sort results
+- save jobs
+- view saved jobs only
+- open a modal with more details about each role
 
-## Customize configuration
+Saved jobs are kept in `localStorage`, so they stay there after refresh.
 
-See [Vite Configuration Reference](https://vite.dev/config/).
+## Built with
 
-## Project Setup
+- Vue 3
+- Composition API
+- JavaScript
+- CSS
+- local JSON data fetched from `public/data/jobs.json`
 
-```sh
+## What I focused on
+
+This project was mainly about improving my frontend fundamentals, especially:
+
+- fetching and displaying data
+- working with parent-owned state
+- props and emits
+- computed filtering and sorting
+- localStorage
+- responsive layout
+- building reusable components
+
+## Screenshots
+
+### Main page
+
+![Main page](./screenshots/main-page.png)
+
+### Filters
+
+![Filters](./screenshots/filters.png)
+
+### Saved jobs
+
+![Saved jobs](./screenshots/saved-jobs.png)
+
+### Job modal
+
+![Job modal](./screenshots/job-modal.png)
+
+### Mobile
+
+![Mobile Main](./screenshots/mobile-1.png)
+
+![Mobile Modal](./screenshots/mobile-2.png)
+
+## Run locallyPreview README
+
+```bash
 npm install
-```
-
-### Compile and Hot-Reload for Development
-
-```sh
 npm run dev
-```
-
-### Compile and Minify for Production
-
-```sh
-npm run build
 ```

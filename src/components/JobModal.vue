@@ -96,7 +96,7 @@ defineProps({
 
 .modal-close {
   position: absolute;
-  top: 1rem;
+  top: 1.5rem;
   right: 1rem;
   width: 42px;
   height: 42px;
@@ -124,7 +124,6 @@ defineProps({
   display: flex;
   flex-direction: column;
   gap: 0.8rem;
-  padding-right: 3rem;
 }
 
 .modal-title {
@@ -135,14 +134,14 @@ defineProps({
 
 .title {
   display: flex;
-  align-items: flex-start;
   justify-content: space-between;
+  align-items: center;
   gap: 1rem;
 }
 
 .save-btn {
-  width: 40px;
-  height: 40px;
+  width: 42px;
+  height: 42px;
   border: 1px solid #dbe3ee;
   border-radius: 10px;
   background: white;
@@ -152,6 +151,7 @@ defineProps({
   align-items: center;
   justify-content: center;
   transition: all 0.2s ease;
+  margin-right: 3rem;
 }
 
 .save-btn:hover {
