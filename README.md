@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="./screenshots/banner.png" alt="NextJob banner" width="100%" />
+</p>
+
 # NextJob
 
 NextJob is a frontend job board built with Vue.
@@ -61,7 +65,7 @@ This project was mainly about improving my frontend fundamentals, especially:
 
 ![Mobile Modal](./screenshots/mobile-2.png)
 
-## Run locallyPreview README
+## Run locally
 
 ```bash
 npm install
