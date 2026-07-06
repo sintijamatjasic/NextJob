@@ -4,6 +4,10 @@
 
 # NextJob
 
+🔴 **Live Demo:** (https://nextjob-app.netlify.app/)
+
+## About
+
 NextJob is a frontend job board built with Vue.
 
 I made this project to practice working with fetched data, component communication, filtering, sorting, saved jobs, and responsive UI design in a way that feels close to a real product.
